@@ -17,7 +17,7 @@ class PostModel(db.Model):
     slug = db.Column(db.String(255))
 
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    author = db.relationship('User', back_populates='posts')
+    author = db.relationship('UserModel', back_populates='posts')
 
     createdAt = db.Column(db.DateTime, nullable=False)
     updatedAt = db.Column(db.DateTime, nullable=False)
@@ -35,11 +35,13 @@ class UserModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
-    username = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(50))
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
     password_hash = db.Column(db.String(100))
     createdAt = db.Column(db.DateTime, nullable=False)
+
+    posts = db.relationship("PostModel", back_populates="author")
 
     @property
     def password(self):
