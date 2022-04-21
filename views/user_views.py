@@ -14,16 +14,14 @@ def user_signup():
 			return make_response(jsonify(
 				{
 					'message': 'This email is already registered with us, please login',
-				}
-			), 422)
+				}), 422)
 		password = request.form['password']
 		confirm_password = request.form['confirmPassword']
 		if password != confirm_password:
 			return make_response(jsonify(
 				{
 					'message': 'passwords must match',
-				}
-			), 422)
+				}), 422)
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
 		username = request.form['username']
@@ -41,8 +39,7 @@ def user_signup():
 			{
 				'message': 'user has been registered',
 				'user': user.json()
-			}
-		), 200)
+			}), 200)
 
 
 def user_login():
@@ -56,17 +53,14 @@ def user_login():
 					{
 						'message': 'user has logged in',
 						'user': userExists.json()
-					}
-				), 200)
+					}), 200)
 			else:
 				return make_response(jsonify(
 					{
 						'message': 'incorrect password',
-					}
-				), 422)
+					}), 422)
 		else:
 			return make_response(jsonify(
 				{
 					'message': 'This email does not exist, please signup',
-				}
-			), 422)
+				}), 422)
