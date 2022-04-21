@@ -25,7 +25,9 @@ class PostModel(db.Model):
     def json(self):
         return {
             "id": self.id,
-            "title": self.title
+            "title": self.title,
+            'body': self.body,
+            'imageUrl': self.imageUrl
         }
 
 

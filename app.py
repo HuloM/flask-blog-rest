@@ -3,6 +3,7 @@ from models import db, flask_bcrypt
 import environ
 import os
 from views.user_views import user_signup, user_login
+from views.post_views import CR_posts, RUD_post
 
 env = environ.Env(DEBUG=(bool, False))
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -33,6 +34,16 @@ def signup():
 @app.route('/login', methods=['POST'])
 def login():
 	return user_login()
+
+
+@app.route('/post/<int:index>', methods=['GET', 'PUT', 'DELETE'])
+def post(index):
+	return RUD_post(index)
+
+
+@app.route('/posts', methods=['GET', 'POST'])
+def posts():
+	return CR_posts()
 
 
 if __name__ == '__main__':
