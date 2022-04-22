@@ -59,6 +59,7 @@ def response_post(message, requested_post):
 
 
 def delete_post(requested_post):
+	delete_image(requested_post.imageUrl)
 	db.session.delete(requested_post)
 	db.session.commit()
 	return response_post('Post deleted Successfully', requested_post)
@@ -67,13 +68,19 @@ def delete_post(requested_post):
 def update_post(requested_post):
 	title = request.form['title']
 	body = request.form['body']
-	imageUrl = request.form['image'] or requested_post.imageUrl
 	requested_post.title = title
 	requested_post.body = body
 	requested_post.updatedAt = dt.now()
-	if requested_post.imageUrl != imageUrl:
-		# TODO delete old image
-		requested_post.imageUrl = imageUrl
+
+	if 'image' in request.files:
+		image = request.files['image']
+		if image:
+			if allowed_file(image.filename):
+				delete_image(requested_post.imageUrl)
+				filename = upload_image(image)
+				requested_post.imageUrl = filename
+			else:
+				return respond_422('incorrect file type submitted (accepted: PNG, JPG, JPEG)')
 	db.session.commit()
 	return response_post('Post updated Successfully', requested_post)
 
@@ -87,7 +94,9 @@ def create_post(userid):
 	if image.filename == '':
 		return respond_422('No image uploaded')
 	if image and allowed_file(image.filename):
-		filename = upload_file(image)
+		filename = upload_image(image)
+	else:
+		return respond_422('incorrect file type submitted (accepted: PNG, JPG, JPEG)')
 	post = Post(
 		title=title,
 		imageUrl=filename or None,
@@ -101,10 +110,14 @@ def create_post(userid):
 	return response_post('Post created Successfully', post)
 
 
-def upload_file(image):
+def upload_image(image):
 	filename = str(dt.now().timestamp()) + '-' + secure_filename(image.filename)
 	image.save(os.path.join(file_upload, filename))
 	return filename
+
+
+def delete_image(filename):
+	os.remove(os.path.join(file_upload, filename))
 
 
 def allowed_file(filename):
