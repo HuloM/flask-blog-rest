@@ -15,8 +15,9 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'blog.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = env('SECRET_KEY')
-app.config['PORT'] = 8080
 app.config['DEBUG'] = True
+app.config['ENV'] = 'development'
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads/images')
 
 db.init_app(app)
 flask_bcrypt.init_app(app)
@@ -47,4 +48,4 @@ def posts():
 
 
 if __name__ == '__main__':
-	app.run()
+	app.run(port=8080)

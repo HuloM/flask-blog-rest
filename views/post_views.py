@@ -1,10 +1,18 @@
+import os
+
 from flask import request, jsonify, make_response
 from datetime import datetime as dt
 
+from werkzeug.utils import secure_filename
+
 from models import PostModel as Post
 from models import db
-from util.error_handler import respond_401
+from util.error_handler import respond_401, respond_422
 from util.user_jwt import decode_jwt, is_user_authenticated
+
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+file_upload = os.path.join(basedir, 'uploads/images')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
 def RUD_post(index):
@@ -73,10 +81,17 @@ def update_post(requested_post):
 def create_post(userid):
 	title = request.form['title']
 	body = request.form['body']
-	imageUrl = request.form['image'] + '-' + str(dt.now().timestamp())
+	if 'image' not in request.files:
+		return respond_422('No image uploaded')
+	image = request.files['image']
+	if image.filename == '':
+		return respond_422('No image uploaded')
+	if image and allowed_file(image.filename):
+		filename = upload_file(image)
+		imageUrl = filename
 	post = Post(
 		title=title,
-		imageUrl=imageUrl,
+		imageUrl=imageUrl or None,
 		body=body,
 		author_id=userid,
 		createdAt=dt.now(),
@@ -85,3 +100,13 @@ def create_post(userid):
 	db.session.add(post)
 	db.session.commit()
 	return response_post('Post created Successfully', post)
+
+
+def upload_file(image):
+	filename = str(dt.now().timestamp()) + '-' + secure_filename(image.filename)
+	image.save(os.path.join(file_upload, filename))
+	return filename
+
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
