@@ -5,7 +5,7 @@ from datetime import datetime as dt
 
 from werkzeug.utils import secure_filename
 
-from models import PostModel as Post
+from models import PostModel as Post, CommentModel as Comment
 from models import db
 from util.error_handler import respond_401, respond_422
 from util.user_jwt import decode_jwt, is_user_authenticated
@@ -15,13 +15,15 @@ file_upload = os.path.join(basedir, 'uploads/images')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
-def RUD_post(index):
+def RUD_post_C_comments(index):
 	requested_post = Post.query.get(index)
 	if request.method == 'GET':
 		return response_post('Post retrieved Successfully', requested_post)
 	token = request.headers['Authorization']
 	if token:
 		decoded = decode_jwt(token)
+		if request.method == 'POST':
+			return create_comment_on_post(index, decoded['userId'])
 		if is_user_authenticated(requested_post.author_id, decoded['userId']):
 			if request.method == 'PUT':
 				return update_post(requested_post)
@@ -48,13 +50,6 @@ def retrieve_all_posts():
 	return make_response(jsonify({
 		'message': 'Posts retrieved successfully',
 		'posts': [post.json() for post in db.session.query(Post).all()]
-	}), 200)
-
-
-def response_post(message, requested_post):
-	return make_response(jsonify({
-		'message': message,
-		'post': requested_post.json()
 	}), 200)
 
 
@@ -122,3 +117,26 @@ def delete_image(filename):
 
 def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def response_post(message, requested_post):
+	return make_response(jsonify({
+		'message': message,
+		'post': requested_post.json()
+	}), 200)
+
+
+def create_comment_on_post(postId, userId):
+	user_comment = request.form['comment']
+	comment = Comment(
+		comment=user_comment,
+		author_id=userId,
+		post_id=postId,
+		createdAt=dt.now()
+	)
+	db.session.add(comment)
+	db.session.commit()
+	return make_response(jsonify({
+		'message': 'Comment created Successfully',
+		'comment': comment.json()
+	}), 200)

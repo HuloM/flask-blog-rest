@@ -1,9 +1,9 @@
-from flask import Flask
+from flask import Flask, request
 from models import db, flask_bcrypt
 import environ
 import os
 from views.user_views import user_signup, user_login
-from views.post_views import CR_posts, RUD_post
+from views.post_views import CR_posts, RUD_post_C_comments
 
 env = environ.Env(DEBUG=(bool, False))
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -37,9 +37,9 @@ def login():
 	return user_login()
 
 
-@app.route('/post/<int:index>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/post/<int:index>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 def post(index):
-	return RUD_post(index)
+	return RUD_post_C_comments(index)
 
 
 @app.route('/posts', methods=['GET', 'POST'])
