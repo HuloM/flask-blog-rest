@@ -1,4 +1,4 @@
-from flask import Flask, make_response, jsonify
+from flask import Flask
 from models import db, flask_bcrypt
 import environ
 import os

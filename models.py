@@ -11,7 +11,7 @@ class PostModel(db.Model):
     __tablename__ = 'post'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(255), unique=True, nullable=False)
+    title = db.Column(db.String(255), nullable=False)
     imageUrl = db.Column(db.String(255), unique=True)
     body = db.Column(db.Text(), nullable=False)
     slug = db.Column(db.String(255))

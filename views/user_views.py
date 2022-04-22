@@ -1,38 +1,39 @@
 from flask import request, jsonify, make_response
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime as dt
 
 from models import UserModel as User
 from models import db
+from util.error_handler import respond_422
+from util.user_jwt import create_jwt
 
 
 def user_signup():
 	if request.method == 'PUT':
 		email = request.form['email']
+
 		userExists = User.query.filter_by(email=email).first()
 		if userExists:
-			return make_response(jsonify(
-				{
-					'message': 'This email is already registered with us, please login',
-				}), 422)
+			return respond_422('This email is already registered with us, please login')
+
 		password = request.form['password']
 		confirm_password = request.form['confirmPassword']
 		if password != confirm_password:
-			return make_response(jsonify(
-				{
-					'message': 'passwords must match',
-				}), 422)
+			return respond_422('passwords must match')
+
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
 		username = request.form['username']
+
 		user = User(
 			email=email,
 			username=username,
+			# password hashing is done through the password.setter method in the user model
 			password=password,
 			first_name=first_name,
 			last_name=last_name,
 			createdAt=dt.now()
 		)
+
 		db.session.add(user)
 		db.session.commit()
 		return make_response(jsonify(
@@ -49,18 +50,13 @@ def user_login():
 		if userExists:
 			password = request.form['password']
 			if userExists.check_password(password):
+				token = create_jwt(userExists)
 				return make_response(jsonify(
 					{
 						'message': 'user has logged in',
-						'user': userExists.json()
+						'token': token
 					}), 200)
 			else:
-				return make_response(jsonify(
-					{
-						'message': 'incorrect password',
-					}), 422)
+				return respond_422('incorrect password')
 		else:
-			return make_response(jsonify(
-				{
-					'message': 'This email does not exist, please signup',
-				}), 422)
+			return respond_422('This email does not exist, please signup')
