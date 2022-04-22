@@ -88,10 +88,9 @@ def create_post(userid):
 		return respond_422('No image uploaded')
 	if image and allowed_file(image.filename):
 		filename = upload_file(image)
-		imageUrl = filename
 	post = Post(
 		title=title,
-		imageUrl=imageUrl or None,
+		imageUrl=filename or None,
 		body=body,
 		author_id=userid,
 		createdAt=dt.now(),
