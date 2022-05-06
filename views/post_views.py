@@ -15,15 +15,13 @@ file_upload = os.path.join(basedir, 'uploads/images')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
-def RUD_post_C_comments(index):
+def RUD_post(index):
 	requested_post = Post.query.get(index)
 	if request.method == 'GET':
 		return response_post('Post retrieved Successfully', requested_post)
 	token = request.headers['Authorization']
 	if token:
 		decoded = decode_jwt(token)
-		if request.method == 'POST':
-			return create_comment_on_post(index, decoded['userId'])
 		if is_user_authenticated(requested_post.author_id, decoded['userId']):
 			if request.method == 'PUT':
 				return update_post(requested_post)
@@ -32,6 +30,15 @@ def RUD_post_C_comments(index):
 		else:
 			return respond_401('User is not author of post')
 	return respond_401('Not Authorized')
+
+
+def C_comments(index):
+	requested_post = Post.query.get(index)
+	token = request.headers['Authorization']
+	if token and request.method == 'POST':
+		decoded = decode_jwt(token)
+		if request.method == 'POST':
+			return create_comment_on_post(index, decoded['userId'])
 
 
 def CR_posts():
