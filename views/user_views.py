@@ -13,12 +13,12 @@ def user_signup():
 
 		userExists = User.query.filter_by(email=email).first()
 		if userExists:
-			return respond_error('This email is already registered with us, please login')
+			return respond_error('This email is already registered with us, please login', 422)
 
 		password = request.form['password']
 		confirm_password = request.form['confirmPassword']
 		if password != confirm_password:
-			return respond_error('passwords must match')
+			return respond_error('passwords must match', 422)
 
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
@@ -57,6 +57,6 @@ def user_login():
 						'token': token
 					}), 200)
 			else:
-				return respond_error('incorrect password')
+				return respond_error('incorrect password', 422)
 		else:
-			return respond_error('This email does not exist, please signup')
+			return respond_error('This email does not exist, please signup', 422)
