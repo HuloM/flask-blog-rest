@@ -3,7 +3,7 @@ from datetime import datetime as dt
 
 from models import UserModel as User
 from models import db
-from util.error_handler import respond_422
+from util.error_handler import respond_error
 from util.user_jwt import create_jwt
 
 
@@ -13,12 +13,12 @@ def user_signup():
 
 		userExists = User.query.filter_by(email=email).first()
 		if userExists:
-			return respond_422('This email is already registered with us, please login')
+			return respond_error('This email is already registered with us, please login')
 
 		password = request.form['password']
 		confirm_password = request.form['confirmPassword']
 		if password != confirm_password:
-			return respond_422('passwords must match')
+			return respond_error('passwords must match')
 
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
@@ -57,6 +57,6 @@ def user_login():
 						'token': token
 					}), 200)
 			else:
-				return respond_422('incorrect password')
+				return respond_error('incorrect password')
 		else:
-			return respond_422('This email does not exist, please signup')
+			return respond_error('This email does not exist, please signup')

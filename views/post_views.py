@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from models import PostModel as Post, CommentModel as Comment
 from models import db
-from util.error_handler import respond_401, respond_422
+from util.error_handler import respond_error
 from util.user_jwt import decode_jwt, is_user_authenticated
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -28,8 +28,8 @@ def RUD_post(index):
 			elif request.method == 'DELETE':
 				return delete_post(requested_post)
 		else:
-			return respond_401('User is not author of post')
-	return respond_401('Not Authorized')
+			return respond_error('User is not author of post', 401)
+	return respond_error('Not Authorized', 401)
 
 
 def C_comments(index):
@@ -48,7 +48,7 @@ def CR_posts():
 			decoded = decode_jwt(token)
 			return create_post(decoded['userId'])
 		else:
-			return respond_401('Not Authorized')
+			return respond_error('Not Authorized', 401)
 	else:
 		return retrieve_all_posts()
 
@@ -68,8 +68,8 @@ def delete_post(requested_post):
 
 
 def update_post(requested_post):
-	title = request.form['title']
-	body = request.form['body']
+	title = request.form['title'] or requested_post.title
+	body = request.form['body'] or requested_post.body
 	requested_post.title = title
 	requested_post.body = body
 	requested_post.updatedAt = dt.now()
@@ -82,7 +82,7 @@ def update_post(requested_post):
 				filename = upload_image(image)
 				requested_post.imageUrl = filename
 			else:
-				return respond_422('incorrect file type submitted (accepted: PNG, JPG, JPEG)')
+				return respond_error('incorrect file type submitted (accepted: PNG, JPG, JPEG)', 422)
 	db.session.commit()
 	return response_post('Post updated Successfully', requested_post)
 
@@ -90,15 +90,16 @@ def update_post(requested_post):
 def create_post(userid):
 	title = request.form['title']
 	body = request.form['body']
-	if 'image' not in request.files:
-		return respond_422('No image uploaded')
+
+	if 'image' not in request.files or title is None or body is None:
+		return respond_error('issue validating inputs', 422)
 	image = request.files['image']
 	if image.filename == '':
-		return respond_422('No image uploaded')
+		return respond_error('No image uploaded', 422)
 	if image and allowed_file(image.filename):
 		filename = upload_image(image)
 	else:
-		return respond_422('incorrect file type submitted (accepted: PNG, JPG, JPEG)')
+		return respond_error('incorrect file type submitted (accepted: PNG, JPG, JPEG)', 422)
 	post = Post(
 		title=title,
 		imageUrl=filename or None,

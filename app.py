@@ -1,12 +1,15 @@
-from flask import Flask, request
+from flask import Flask
 from models import db, flask_bcrypt
 import environ
 import os
 from views.user_views import user_signup, user_login
 from views.post_views import CR_posts, RUD_post, C_comments
+from flask_migrate import Migrate
 
 env = environ.Env(DEBUG=(bool, False))
+# basedir holds the path to the root of the project directory
 basedir = os.path.abspath(os.path.dirname(__file__))
+# reads variables from the .env file
 environ.Env.read_env(os.path.join(basedir, '.env'))
 
 app = Flask(__name__)
@@ -23,7 +26,7 @@ db.init_app(app)
 flask_bcrypt.init_app(app)
 
 app.app_context().push()
-
+migrate = Migrate(app, db)
 db.create_all()
 
 
