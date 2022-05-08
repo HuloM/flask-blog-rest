@@ -17,6 +17,8 @@ class PostModel(db.Model):
 	author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	author = db.relationship('UserModel', back_populates='posts')
 
+	comments = db.relationship('CommentModel', back_populates='post')
+
 	createdAt = db.Column(db.DateTime, nullable=False)
 	updatedAt = db.Column(db.DateTime, nullable=False)
 
@@ -25,7 +27,10 @@ class PostModel(db.Model):
 			'id': self.id,
 			'title': self.title,
 			'body': self.body,
-			'imageUrl': self.imageUrl
+			'imageUrl': self.imageUrl,
+			'createdAt': self.createdAt,
+			'author': self.author.json(),
+			'comments': [comment.json() for comment in self.comments]
 		}
 
 
@@ -36,8 +41,10 @@ class CommentModel(db.Model):
 	comment = db.Column(db.String(255), nullable=False)
 
 	author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	author = db.relationship('UserModel', back_populates='comments')
 
 	post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+	post = db.relationship('PostModel', back_populates='comments')
 
 	createdAt = db.Column(db.DateTime, nullable=False)
 
@@ -45,6 +52,7 @@ class CommentModel(db.Model):
 		return {
 			'id': self.id,
 			'comment': self.comment,
+			'author': self.author.json()
 		}
 
 
@@ -61,6 +69,7 @@ class UserModel(db.Model):
 	createdAt = db.Column(db.DateTime, nullable=False)
 
 	posts = db.relationship('PostModel', back_populates='author')
+	comments = db.relationship('CommentModel', back_populates='author')
 
 	@property
 	def password(self):

@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_cors import CORS
+
 from models import db, flask_bcrypt
 import environ
 import os
@@ -13,7 +15,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 environ.Env.read_env(os.path.join(basedir, '.env'))
 
 app = Flask(__name__)
-
+CORS(app, resources=r'/*')
 # config options
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'blog.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -32,6 +34,7 @@ db.create_all()
 
 @app.route('/signup', methods=['PUT'])
 def signup():
+	print('test api route method')
 	return user_signup()
 
 
@@ -50,7 +53,7 @@ def comment(index):
 	return C_comments(index)
 
 
-@app.route('/posts', methods=['GET', 'POST'])
+@app.route('/posts/', methods=['GET', 'POST'])
 def posts():
 	return CR_posts()
 

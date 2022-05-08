@@ -10,19 +10,18 @@ from util.user_jwt import create_jwt
 def user_signup():
 	if request.method == 'PUT':
 		email = request.form['email']
+		first_name = request.form['first_name']
+		last_name = request.form['last_name']
+		username = request.form['username']
+		password = request.form['password']
+		confirm_password = request.form['confirmPassword']
 
 		userExists = User.query.filter_by(email=email).first()
 		if userExists:
 			return respond_error('This email is already registered with us, please login', 422)
 
-		password = request.form['password']
-		confirm_password = request.form['confirmPassword']
 		if password != confirm_password:
 			return respond_error('passwords must match', 422)
-
-		first_name = request.form['first_name']
-		last_name = request.form['last_name']
-		username = request.form['username']
 
 		user = User(
 			email=email,

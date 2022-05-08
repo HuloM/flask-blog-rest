@@ -17,6 +17,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def RUD_post(index):
 	requested_post = Post.query.get(index)
+	if requested_post is None:
+		return respond_error('That post does not exist', 422)
 	if request.method == 'GET':
 		return response_post('Post retrieved Successfully', requested_post)
 	token = request.headers['Authorization']
@@ -37,8 +39,7 @@ def C_comments(index):
 	token = request.headers['Authorization']
 	if token and request.method == 'POST':
 		decoded = decode_jwt(token)
-		if request.method == 'POST':
-			return create_comment_on_post(index, decoded['userId'])
+		return create_comment_on_post(index, decoded['userId'])
 
 
 def CR_posts():
@@ -54,6 +55,7 @@ def CR_posts():
 
 
 def retrieve_all_posts():
+	print('Retrieving all posts')
 	return make_response(jsonify({
 		'message': 'Posts retrieved successfully',
 		'posts': [post.json() for post in db.session.query(Post).all()]
