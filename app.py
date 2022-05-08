@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_file
 from flask_cors import CORS
 
 from models import db, flask_bcrypt
@@ -14,7 +14,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # reads variables from the .env file
 environ.Env.read_env(os.path.join(basedir, '.env'))
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='',
+            static_folder='uploads')
 CORS(app, resources=r'/*')
 # config options
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'blog.db')
@@ -22,7 +23,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = env('SECRET_KEY')
 app.config['DEBUG'] = True
 app.config['ENV'] = 'development'
-app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads/images')
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads\\images')
 
 db.init_app(app)
 flask_bcrypt.init_app(app)
@@ -30,6 +31,13 @@ flask_bcrypt.init_app(app)
 app.app_context().push()
 migrate = Migrate(app, db)
 db.create_all()
+
+
+@app.route('/static/<path:path>')
+def send_report(path):
+	img_path = os.path.join(app.config['UPLOAD_FOLDER'], str(path))
+	print('sending', img_path)
+	return send_file(img_path)
 
 
 @app.route('/signup', methods=['PUT'])

@@ -58,7 +58,7 @@ def retrieve_all_posts():
 	print('Retrieving all posts')
 	return make_response(jsonify({
 		'message': 'Posts retrieved successfully',
-		'posts': [post.json() for post in db.session.query(Post).all()]
+		'posts': [post.list_json() for post in db.session.query(Post).all()]
 	}), 200)
 
 
@@ -116,7 +116,7 @@ def create_post(userid):
 
 
 def upload_image(image):
-	filename = str(dt.now().timestamp()) + '-' + secure_filename(image.filename)
+	filename = str(dt.now().timestamp()).replace('.', '') + secure_filename(image.filename)
 	image.save(os.path.join(file_upload, filename))
 	return filename
 

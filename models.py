@@ -33,6 +33,14 @@ class PostModel(db.Model):
 			'comments': [comment.json() for comment in self.comments]
 		}
 
+	def list_json(self):
+		return {
+			'id': self.id,
+			'title': self.title,
+			'createdAt': self.createdAt,
+			'author': self.author.json(),
+		}
+
 
 class CommentModel(db.Model):
 	__tablename__ = 'comment'
