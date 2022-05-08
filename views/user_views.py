@@ -45,7 +45,9 @@ def user_signup():
 def user_login():
 	if request.method == 'POST':
 		email = request.form['email']
+		print(email)
 		userExists = User.query.filter_by(email=email).first()
+		print(userExists)
 		if userExists:
 			password = request.form['password']
 			if userExists.check_password(password):
@@ -53,9 +55,11 @@ def user_login():
 				return make_response(jsonify(
 					{
 						'message': 'user has logged in',
-						'token': token
+						'token': token,
+						'username': userExists.username,
+						'userId': userExists.id
 					}), 200)
 			else:
-				return respond_error('incorrect password', 422)
+				return respond_error('incorrect password', 401)
 		else:
 			return respond_error('This email does not exist, please signup', 422)
