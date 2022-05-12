@@ -45,9 +45,7 @@ def user_signup():
 def user_login():
 	if request.method == 'POST':
 		email = request.form['email']
-		print(email)
 		userExists = User.query.filter_by(email=email).first()
-		print(userExists)
 		if userExists:
 			password = request.form['password']
 			if userExists.check_password(password):

@@ -18,7 +18,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def RUD_post(index):
 	requested_post = Post.query.get(index)
 	if requested_post is None:
-		return respond_error('That post does not exist', 422)
+		return respond_error('That post does not exist', 404)
 	if request.method == 'GET':
 		return response_post('Post retrieved Successfully', requested_post)
 	token = request.headers['Authorization']
@@ -35,7 +35,6 @@ def RUD_post(index):
 
 
 def C_comments(index):
-	requested_post = Post.query.get(index)
 	token = request.headers['Authorization']
 	if token and request.method == 'POST':
 		decoded = decode_jwt(token)
@@ -55,9 +54,8 @@ def CR_posts():
 
 
 def retrieve_all_posts():
-	print('Retrieving all posts')
 	return make_response(jsonify({
-		'message': 'Posts retrieved successfully',
+		'message': 'Posts Retrieved Successfully',
 		'posts': [post.list_json() for post in db.session.query(Post).all()]
 	}), 200)
 
@@ -66,7 +64,7 @@ def delete_post(requested_post):
 	delete_image(requested_post.imageUrl)
 	db.session.delete(requested_post)
 	db.session.commit()
-	return response_post('Post deleted Successfully', requested_post)
+	return response_post('Post Deleted Successfully', requested_post)
 
 
 def update_post(requested_post):
@@ -86,7 +84,7 @@ def update_post(requested_post):
 			else:
 				return respond_error('incorrect file type submitted (accepted: PNG, JPG, JPEG)', 422)
 	db.session.commit()
-	return response_post('Post updated Successfully', requested_post)
+	return response_post('Post Updated Successfully', requested_post)
 
 
 def create_post(userid):
@@ -112,7 +110,7 @@ def create_post(userid):
 	)
 	db.session.add(post)
 	db.session.commit()
-	return response_post('Post created Successfully', post)
+	return response_post('Post Created Successfully', post)
 
 
 def upload_image(image):
@@ -147,6 +145,6 @@ def create_comment_on_post(postId, userId):
 	db.session.add(comment)
 	db.session.commit()
 	return make_response(jsonify({
-		'message': 'Comment created Successfully',
+		'message': 'Comment Created Successfully',
 		'comment': comment.json()
 	}), 200)
