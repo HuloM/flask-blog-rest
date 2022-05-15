@@ -5,7 +5,7 @@ import os
 env = environ.Env(DEBUG=(bool, False))
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 environ.Env.read_env(os.path.join(basedir, '.env'))
-secret = env('JWT_SECRET_KEY')
+secret = os.environ['JWT_SECRET_KEY']
 
 
 def create_jwt(user):

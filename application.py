@@ -20,7 +20,7 @@ CORS(app, resources=r'/*')
 # config options
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'blog.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = env('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 app.config['DEBUG'] = True
 app.config['ENV'] = 'development'
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads\\images')
