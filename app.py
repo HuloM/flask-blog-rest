@@ -5,7 +5,7 @@ from models import db, flask_bcrypt
 import environ
 import os
 from views.user_views import user_signup, user_login
-from views.post_views import CR_posts, RUD_post, C_comments
+from views.post_views import C_posts, RUD_post, C_comments, retrieve_all_posts
 from flask_migrate import Migrate
 
 env = environ.Env(DEBUG=(bool, False))
@@ -15,7 +15,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 environ.Env.read_env(os.path.join(basedir, '.env'))
 
 app = Flask(__name__, static_url_path='',
-            static_folder='uploads')
+			static_folder='uploads')
 CORS(app, resources=r'/*')
 # config options
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'blog.db')
@@ -36,13 +36,11 @@ db.create_all()
 @app.route('/static/<path:path>')
 def send_report(path):
 	img_path = os.path.join(app.config['UPLOAD_FOLDER'], str(path))
-	print('sending', img_path)
 	return send_file(img_path)
 
 
 @app.route('/signup', methods=['PUT'])
 def signup():
-	print('test api route method')
 	return user_signup()
 
 
@@ -51,7 +49,7 @@ def login():
 	return user_login()
 
 
-@app.route('/post/<int:index>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/post/<int:index>/', methods=['GET', 'PUT', 'DELETE'])
 def post(index):
 	return RUD_post(index)
 
@@ -61,9 +59,14 @@ def comment(index):
 	return C_comments(index)
 
 
-@app.route('/posts/', methods=['GET', 'POST'])
-def posts():
-	return CR_posts()
+@app.route('/posts', methods=['POST'])
+def CreatePost():
+	return C_posts()
+
+
+@app.route('/posts/<int:page>/', defaults={'page': 1})
+def posts(page):
+	return retrieve_all_posts(page)
 
 
 if __name__ == '__main__':

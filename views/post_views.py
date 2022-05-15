@@ -41,7 +41,7 @@ def C_comments(index):
 		return create_comment_on_post(index, decoded['userId'])
 
 
-def CR_posts():
+def C_posts():
 	if request.method == 'POST':
 		token = request.headers['Authorization']
 		if token:
@@ -49,14 +49,15 @@ def CR_posts():
 			return create_post(decoded['userId'])
 		else:
 			return respond_error('Not Authorized', 401)
-	else:
-		return retrieve_all_posts()
 
 
-def retrieve_all_posts():
+def retrieve_all_posts(page):
+	posts = Post.query.paginate(page, 3)
+
 	return make_response(jsonify({
 		'message': 'Posts Retrieved Successfully',
-		'posts': [post.list_json() for post in db.session.query(Post).all()]
+		'posts': [post.list_json() for post in posts.items],
+		'totalPages': posts.pages
 	}), 200)
 
 
